@@ -17,21 +17,25 @@ refs.searchForm.addEventListener('submit', onSearch);
 refs.loadMoreBtn.addEventListener('click', onLoadMore);
 
 let lightbox = new SimpleLightbox('.gallery a', {
-  animationSpeed: 500,
+  animationSpeed: 250,
 });
 
 async function onSearch(event) {
   event.preventDefault();
   refs.galleryField.innerHTML = '';
 
-  const customersRequest = event.currentTarget.elements.searchQuery.value;
-  createArticle.query = customersRequest;
+  createArticle.query = event.currentTarget.elements.searchQuery.value.trim();
 
-  createArticle.resetPage();
-  loadMoreBtn.show();
-  loadMoreBtn.disable();
+  if (!createArticle.query) {
+    loadMoreBtn.hide();
+    loadMoreBtn.disable();
+    refs.galleryField.innerHTML = '';
+    Notify.failure('Sorry, search field is empty :(');
+    return;
+  }
 
   try {
+    createArticle.resetPage();
     const newArticle = await createArticle.createArticle();
     const articleData = newArticle.data.hits;
     const totalArticles = newArticle.data.totalHits;
@@ -44,15 +48,20 @@ async function onSearch(event) {
       loadMoreBtn.hide();
       loadMoreBtn.disable();
       refs.galleryField.innerHTML = '';
+      return;
     }
 
-    Notify.success(`Hooray! We found ${totalArticles} images.`);
-    let markup = markupCreator(articleData);
+    loadMoreBtn.show();
+    loadMoreBtn.disable();
 
+    Notify.success(`Hooray! We found ${totalArticles} images.`);
+
+    let markup = markupCreator(articleData);
     refs.galleryField.insertAdjacentHTML('beforeend', markup);
-    loadMoreBtn.enable();
     lightbox.refresh();
-    totalHits(createArticle.page, totalPages);
+
+    loadMoreBtn.enable();
+    totalPagesCheck(createArticle.page, totalPages);
   } catch (error) {
     console.log(error);
   }
@@ -65,12 +74,16 @@ async function onLoadMore() {
     const articleData = newArticle.data.hits;
     const totalArticles = newArticle.data.totalHits;
     const totalPages = Math.ceil(totalArticles / 40) + 1;
-    let markup = markupCreator(articleData);
 
+    let markup = markupCreator(articleData);
     refs.galleryField.insertAdjacentHTML('beforeend', markup);
-    loadMoreBtn.enable();
     lightbox.refresh();
-    totalHits(createArticle.page, totalPages);
+
+    pageScroll();
+
+    loadMoreBtn.enable();
+
+    totalPagesCheck(createArticle.page, totalPages);
   } catch (error) {
     console.log(error);
   }
@@ -80,7 +93,7 @@ function markupCreator(items) {
   return items
     .map(item => {
       return `
- <a href="${item.largeImageURL}" class="wrapper" self>
+ <a href="${item.largeImageURL}" class="wrapper">
   <img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" />
   <div class="info">
     <p class="info-item"><b>Likes: ${item.likes}</b></p>
@@ -94,11 +107,22 @@ function markupCreator(items) {
     .join('');
 }
 
-function totalHits(page, totalPages) {
+function totalPagesCheck(page, totalPages) {
   if (page === totalPages) {
     loadMoreBtn.hide();
     loadMoreBtn.disable();
     Notify.info(`We're sorry, but you've reached the end of search results.`);
     return;
   }
+}
+
+function pageScroll() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
 }

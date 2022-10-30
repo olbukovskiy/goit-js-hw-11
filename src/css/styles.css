@@ -36,7 +36,17 @@ img {
 }
 
 .search-form {
-  margin-top: 100px;
+  position: fixed;
+  top: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100vw;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  background-color: #0d6efd;
 
   display: flex;
   column-gap: 30px;
@@ -48,7 +58,6 @@ img {
   width: 100%;
   height: 36px;
   max-width: 300px;
-  margin-bottom: 30px;
   border-radius: 6px;
   border-color: #86b7fe;
 }
@@ -71,6 +80,8 @@ img {
 }
 
 .gallery {
+  margin-top: 130px;
+
   display: grid;
   grid-template-columns: repeat(5, 330px);
   grid-auto-rows: 283px;
@@ -96,6 +107,7 @@ img {
 }
 
 .submit-btn:hover {
+  border-color: #000;
   color: #fff;
   background-color: #0d6efd;
 }
