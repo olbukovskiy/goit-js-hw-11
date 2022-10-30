@@ -122,7 +122,7 @@ function pageScroll() {
     .firstElementChild.getBoundingClientRect();
 
   window.scrollBy({
-    top: cardHeight * 2.5 + 40,
+    top: cardHeight * 2.67,
     behavior: 'smooth',
   });
 }
