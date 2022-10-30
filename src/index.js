@@ -60,6 +60,13 @@ async function onSearch(event) {
     refs.galleryField.insertAdjacentHTML('beforeend', markup);
     lightbox.refresh();
 
+    // let infScroll = new InfiniteScroll(refs.galleryField, {
+    //   // options
+    //   path: '.pagination__next',
+    //   append: '.post',
+    //   history: false,
+    // });
+
     loadMoreBtn.enable();
     totalPagesCheck(createArticle.page, totalPages);
   } catch (error) {
@@ -89,11 +96,30 @@ async function onLoadMore() {
   }
 }
 
+function pageScroll() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  console.log(cardHeight);
+  console.log(document.querySelector('.gallery').firstElementChild);
+  console.log(
+    document.querySelector('.gallery').firstElementChild.getBoundingClientRect()
+  );
+
+  const options = {
+    top: cardHeight * 3.6,
+    behavior: 'smooth',
+  };
+
+  window.scrollBy(options);
+}
+
 function markupCreator(items) {
   return items
     .map(item => {
       return `
- <a href="${item.largeImageURL}" class="wrapper">
+ <a href="${item.largeImageURL}" class="wrapper post">
   <img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" />
   <div class="info">
     <p class="info-item"><b>Likes: ${item.likes}</b></p>
@@ -114,15 +140,4 @@ function totalPagesCheck(page, totalPages) {
     Notify.info(`We're sorry, but you've reached the end of search results.`);
     return;
   }
-}
-
-function pageScroll() {
-  const { height: cardHeight } = document
-    .querySelector('.gallery')
-    .firstElementChild.getBoundingClientRect();
-
-  window.scrollBy({
-    top: cardHeight * 2.67,
-    behavior: 'smooth',
-  });
 }

@@ -1,6 +1,6 @@
-.container {
+.container-all {
   padding: 0 15px;
-  width: 1640px;
+  width: 100vw;
   margin-left: auto;
   margin-right: auto;
 
@@ -42,14 +42,12 @@ img {
   display: flex;
   justify-content: center;
   align-items: center;
+  column-gap: 30px;
 
   width: 100vw;
   padding-top: 30px;
   padding-bottom: 30px;
   background-color: #0d6efd;
-
-  display: flex;
-  column-gap: 30px;
 }
 
 .search-field {
