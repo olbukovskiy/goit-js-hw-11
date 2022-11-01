@@ -36,10 +36,7 @@ async function onSearch(event) {
 
   try {
     createArticle.resetPage();
-    const newArticle = await createArticle.createArticle();
-    const articleData = newArticle.data.hits;
-    const totalArticles = newArticle.data.totalHits;
-    const totalPages = Math.ceil(totalArticles / 40) + 1;
+    const { articleData, totalArticles, totalPages } = await getPicturesData();
 
     if (!articleData.length) {
       Notify.failure(
@@ -60,13 +57,6 @@ async function onSearch(event) {
     refs.galleryField.insertAdjacentHTML('beforeend', markup);
     lightbox.refresh();
 
-    // let infScroll = new InfiniteScroll(refs.galleryField, {
-    //   // options
-    //   path: '.pagination__next',
-    //   append: '.post',
-    //   history: false,
-    // });
-
     loadMoreBtn.enable();
     totalPagesCheck(createArticle.page, totalPages);
   } catch (error) {
@@ -77,10 +67,7 @@ async function onSearch(event) {
 async function onLoadMore() {
   loadMoreBtn.disable();
   try {
-    const newArticle = await createArticle.createArticle();
-    const articleData = newArticle.data.hits;
-    const totalArticles = newArticle.data.totalHits;
-    const totalPages = Math.ceil(totalArticles / 40) + 1;
+    const { articleData, totalPages } = await getPicturesData();
 
     let markup = markupCreator(articleData);
     refs.galleryField.insertAdjacentHTML('beforeend', markup);
@@ -101,12 +88,6 @@ function pageScroll() {
     .querySelector('.gallery')
     .firstElementChild.getBoundingClientRect();
 
-  console.log(cardHeight);
-  console.log(document.querySelector('.gallery').firstElementChild);
-  console.log(
-    document.querySelector('.gallery').firstElementChild.getBoundingClientRect()
-  );
-
   const options = {
     top: cardHeight * 3.6,
     behavior: 'smooth',
@@ -117,19 +98,29 @@ function pageScroll() {
 
 function markupCreator(items) {
   return items
-    .map(item => {
-      return `
- <a href="${item.largeImageURL}" class="wrapper post">
-  <img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" />
+    .map(
+      ({
+        largeImageURL,
+        webformatURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) => {
+        return `
+ <a href="${largeImageURL}" class="wrapper">
+  <img src="${webformatURL}" alt="${tags}" loading="lazy" />
   <div class="info">
-    <p class="info-item"><b>Likes: ${item.likes}</b></p>
-    <p class="info-item"><b>Views: ${item.views}</b></p>
-    <p class="info-item"><b>Comments: ${item.comments}</b></p>
-    <p class="info-item"><b>Downloads: ${item.downloads}</b></p>
+    <p class="info-item"><b>Likes: ${likes}</b></p>
+    <p class="info-item"><b>Views: ${views}</b></p>
+    <p class="info-item"><b>Comments: ${comments}</b></p>
+    <p class="info-item"><b>Downloads: ${downloads}</b></p>
   </div>
 </a>
 `;
-    })
+      }
+    )
     .join('');
 }
 
@@ -140,4 +131,16 @@ function totalPagesCheck(page, totalPages) {
     Notify.info(`We're sorry, but you've reached the end of search results.`);
     return;
   }
+}
+
+async function getPicturesData() {
+  const newArticle = await createArticle.createArticle();
+  const articleData = newArticle.data.hits;
+  const totalArticles = newArticle.data.totalHits;
+  const totalPages = Math.ceil(totalArticles / 40) + 1;
+  return {
+    articleData,
+    totalArticles,
+    totalPages,
+  };
 }
